@@ -156,42 +156,6 @@ deltaV required for Capture:%.2f \ndeltaV required for injection:%.2f \nhohmann 
 SOI entry: %.2f \ndeltaV:%.2f" % (orig_planet_velocity,tar_planet_velocity,VexitSOI,VentrySOI,Vexit,Ventry,VelocityInjection,HyperbolicVelocity,deltaVcapture,deltaVinjection,ht,target_body_SOI_entry,deltaVtransfer)
 	
 	return deltaVtransfer
-	
-#def planet_transferold(planetA,planetB,orbitA,orbitB):
-#	
-#	parkingorbitA = orbitA + planets[planetA]['radius']
-#	parkingorbitB = orbitB + planets[planetB]['radius']
-#	
-#	velocityParking_orbit_A = orbital_velocity(planets[planetA]['mu'],parkingorbitA)
-#	velocityParking_orbit_B = orbital_velocity(planets[planetB]['mu'],parkingorbitB)
-#	
-#	planet_distanceA = Decimal(planets[planetA]['Ap']+planets[planetA]['Po'])/Decimal(2)
-#	planet_distanceB = Decimal(planets[planetB]['Ap']+planets[planetB]['Po'])/Decimal(2)
-#		
-#	planetaryVelocityA = orbital_velocity(planets['Sun']['mu'],planet_distanceA)
-#	planetaryVelocityB = orbital_velocity(planets['Sun']['mu'],planet_distanceB)
-#	
-#	factor1A = Decimal(2)/Decimal(planet_distanceA)
-#	factor2A = Decimal(2)/Decimal(planet_distanceA + planet_distanceB)
-#	
-#	factor1B = Decimal(2)/Decimal(planet_distanceB)
-#	factor2B = Decimal(2)/Decimal(planet_distanceA + planet_distanceB)
-#	
-#	velocitySOIentry = sqrt(Decimal(planets['Sun']['mu'])*Decimal(factor1B - factor2B))
-#	velocitySOIexit = sqrt(Decimal(planets['Sun']['mu'])*Decimal(factor1A - factor2A))
-#	
-#	print velocitySOIentry
-#	print velocitySOIexit
-#	
-#	deltaVescape = velocitySOIexit - planetaryVelocityA
-#	deltaVcapture = velocitySOIentry - planetaryVelocityB
-#	
-#	print deltaVescape
-#	print deltaVcapture
-#	
-#	deltaVtransfer = abs(deltaVescape) + abs(deltaVcapture)
-#	
-#	return deltaVtransfer 
 
 #mt
 def moon_transfer(parent_body,moon,parent_orbit,moon_orbit):
@@ -222,7 +186,6 @@ def hohmann_transfer(original_orbit,final_orbit,planet):
 	initialvelocity = orbital_velocity(mu,originalDistance)
 	finalvelocity = orbital_velocity(mu,finalDistance)
 	
-	#factor = [Decimal(2)/Decimal(originalDistance),Decimal(1)/Decimal(transfer_majoraxis),Decimal(2)/Decimal(finalDistance)]
 	factor1 = Decimal(2)/Decimal(originalDistance)
 	factor2 = Decimal(1)/Decimal(transfer_majoraxis)
 	factor3 = Decimal(2)/Decimal(finalDistance)
@@ -258,16 +221,6 @@ def timeindarkness(planet,distance):
 
 def landing(displacement,planet,mu):
 	'''Calculates the deltaV needed to land on a vacuum planet'''
-#	descentHght = raw_input('What is your height before descent, in Km?')
-#	surface_gravity=float(mu)/float(pow(planets[planet.capitalize()]['radius'],2))
-#	time_seconds=sqrt((2*descentHght)/surface_gravity)
-#	orbitalVelocity = orbital_velocity(mu,displacement)
-#	#from my landing path to the surface. 
-#	deltaVforLanding = float(.5*surface_gravity*time_seconds)# + orbitalVelocity
-#	print deltaVforLanding
-#	descent_deltaV=deltaVforLanding + orbitalVelocity
-#	print 'Descent time from %s meters: %s seconds' % (displacement,time_seconds)
-#	return descent_deltaV
 	surface_gravity=float(mu)/float(pow(planets[planet.capitalize()]['radius'],2))
 	time_seconds=sqrt((2*displacement)/surface_gravity)
 	orbitalVelocity = orbital_velocity(mu,displacement)
@@ -441,25 +394,3 @@ print 'To start script, execute .run()'
 ########################################################
 
 
-#####################################################################	
-# Django Tutorial - https://media.readthedocs.org/pdf/django/latest/django.pdf
-# Django Tutorial - http://www.effectivedjango.com/latex/EffectiveDjango.pdf
-# Definitive Guide - http://www.puyb.net/download/djangobook/res.pdf
-
-# This code works	
-#circle_ycoordinates = [circlegraph(3,x) for x in range(360)]
-#print 'x'
-#for item in circle_ycoordinates:
-#	print item[0]
-
-#print 'y'
-#for item in circle_ycoordinates:
-#	print item[1]
-
-# class mission_plan
-#	self.deltaV
-#	asked which planet you're taking off from, what altitude you want 
-#	to go to
-#	
-#
-#####################################################################
