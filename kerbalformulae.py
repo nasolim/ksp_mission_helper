@@ -1,8 +1,16 @@
+# Script Name: kerbalformulae.py
+# Author: Milo Sanu	
+# Created: 2/15/15
+# Last Modified:
+# Version: 2.0
+# Modifications:
+# Description: This script provides the user with mission planning data. Data includes
+#				maneuver deltaV's and time spent of dark side of celestial bodies. 
+
 from math import sin,cos,sqrt,pi
 from decimal import Decimal, getcontext
 from functools import partial
 
-#test inputx
 
 # 20115 char 463 lines ######################################################
 ######################## 		Constants     		 #########################
@@ -56,7 +64,7 @@ def sphere_of_influence(planet):
 
 #Input is degree change 
 def inclination_change(velocity,degree_change): #ic
-	'''Deleivers the deltaV needed to execute an inclination change of X at a
+	'''Delivers the deltaV needed to execute an inclination change of X at a
 	particular altitude
 	velocity ==> V in meters per second
 	degree_change ==> X in degrees
@@ -176,30 +184,22 @@ def moon_transfer(parent_body,moon,parent_orbit,moon_orbit):
 
 #ht
 def hohmann_transfer(original_orbit,final_orbit,planet):
-	''' DeltaV needed to perform a hohmann transfer manuever'''
+	'''Returns DeltaV needed to perform desired Hohmann Transfer manuever'''
 	mu = Decimal(planets[planet]['mu'])
 	originalDistance = original_orbit + planets[planet]['radius']
 	finalDistance = final_orbit + planets[planet]['radius']
-	
 	transfer_majoraxis = Decimal(originalDistance + finalDistance)/Decimal(2)
-
 	initialvelocity = orbital_velocity(mu,originalDistance)
 	finalvelocity = orbital_velocity(mu,finalDistance)
-	
 	factor1 = Decimal(2)/Decimal(originalDistance)
 	factor2 = Decimal(1)/Decimal(transfer_majoraxis)
 	factor3 = Decimal(2)/Decimal(finalDistance)
-	
 	transfervelocitybegin = Decimal(sqrt(Decimal(mu)*Decimal((factor1-factor2))))
-	
 	transfervelocitybegin = Decimal(sqrt(Decimal(mu)*Decimal((factor1-factor2))))
 	transfervelocityfinal = Decimal(sqrt(Decimal(mu)*Decimal((factor3-factor2))))
-	
 	deltaA = Decimal(transfervelocitybegin) - Decimal(initialvelocity)
 	deltaB = Decimal(finalvelocity) - Decimal(transfervelocityfinal)
-	
 	deltaTransfer = float(Decimal(deltaA) + Decimal(deltaB))
-	
 	return abs(deltaTransfer)
 
 #td
@@ -214,9 +214,6 @@ def timeindarkness(planet,distance):
 	time = Decimal(length)/Decimal(velocity)
 	time = Decimal(time)/Decimal(60)
 	return time # in minutes
-
-#def landing(displacement,planet,mu):
-	return 100
 
 
 def landing(displacement,planet,mu):
@@ -236,6 +233,11 @@ def landing(displacement,planet,mu):
 ##############################################################################
 ################################# Calling Area ###############################
 
+def altitude_q():
+	txt ='What is Your Altitude, in Km?\n> '
+	altitude = float(raw_input(txt))*1000
+	return altitude
+	
 def orbiting_body():
 	txt = '\nWhat is the Orbiting Body?\n'+planets['Sun']['Moons']+'\n> '
 	planet = raw_input(txt)
@@ -244,8 +246,7 @@ def orbiting_body():
 def ic():
 	planet = orbiting_body()
 	mu = planets[planet.capitalize()]['mu']
-	txt ='What is Your Altitude, in Km?\n> '
-	altitude = float(raw_input(txt))*1000
+	altitude = altitude_q()
 	distance = planets[planet.capitalize()]['radius'] + altitude
 	velocity = orbital_velocity(mu,distance)
 	txt ='How many degrees would you like to change your orbit by?\n> '
@@ -255,8 +256,7 @@ def ic():
 def ov():
 	planet = orbiting_body()
 	mu = planets[planet.capitalize()]['mu']
-	txt ='What is Your Altitude, in Km?'+'\n> '
-	altitude = float(raw_input(txt))*1000
+	altitude = altitude_q()
 	distance = float(planets[planet.capitalize()]['radius'] + altitude)
 	velocity = orbital_velocity(mu,distance)
 	return velocity
@@ -313,8 +313,7 @@ def mt():
 def lg():
 	planet = orbiting_body()
 	mu = planets[planet.capitalize()]['mu']
-	txt ='What is Your Altitude, in Km?\n> '
-	altitude = float(raw_input(txt))*1000
+	altitude = altitude_q()
 	return landing(altitude,planet,mu)
 
 def main():
