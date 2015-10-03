@@ -105,7 +105,7 @@ def planet_transfer(origin_body,target_body,origin_body_orbit,target_body_orbit)
 	## determine what the origin and target planet are
 	## determine the orbits around origin and target planet
 
-	target_body_SOI_entry = Decimal(sphere_of_influence(target_body.capitalize()))*Decimal(.75)
+	target_body_SOI_entry = Decimal(sphere_of_influence(target_body))*Decimal(.75)
 
 	semimajor_axis_origin = origin_body_orbit + planets[origin_body]['radius']
 	semimajor_axis_target = target_body_SOI_entry + planets[target_body]['radius']
@@ -134,13 +134,15 @@ def planet_transfer(origin_body,target_body,origin_body_orbit,target_body_orbit)
 
 	Vexit = abs(float(VexitSOI - orig_planet_velocity))
 	Ventry = float(VentrySOI - tar_planet_velocity)
-
+	
+	origin_body,target_body = planets[origin_body],planets[target_body]
+	
 	#determine velocity just after injection burn
-	factor = [Decimal(Vexit**2) / Decimal(2), Decimal(planets[origin_body]['mu']) / Decimal(semimajor_axis_origin)]
+	factor = [Decimal(Vexit**2) / Decimal(2), Decimal(origin_body['mu']) / Decimal(semimajor_axis_origin)]
 	VelocityInjection = sqrt ( 2 * Decimal(factor[0].__float__() + factor[1].__float__()))
 
 	#determine velocity of hyberpolic orbit over target planet
-	factor = [Decimal(Ventry**2) / Decimal(2),Decimal(planets[target_body]['mu']) / Decimal(semimajor_axis_target)]
+	factor = [Decimal(Ventry**2) / Decimal(2),Decimal(target_body['mu']) / Decimal(semimajor_axis_target)]
 	HyperbolicVelocity = sqrt ( 2 * Decimal(factor[0].__float__() + factor[1].__float__()))
 
 	## determine deltaV for injection and capture
@@ -150,7 +152,7 @@ def planet_transfer(origin_body,target_body,origin_body_orbit,target_body_orbit)
 
 	target_body_orbit = Decimal(target_body_orbit)
 	## hohmann transfer from heigh of hyperbolic entry to desired orbit
-	ht = hohmann_transfer(target_body_SOI_entry,target_body_orbit,target_body.capitalize())
+	ht = hohmann_transfer(target_body_SOI_entry,target_body_orbit,target_body['radius'],target_body['mu'])
 
 	## add the deltaV's together
 
@@ -183,11 +185,11 @@ def moon_transfer(parent_body,moon,parent_orbit,moon_orbit):
 	return deltaV_A
 
 #ht
-def hohmann_transfer(original_orbit,final_orbit,planet):
+def hohmann_transfer(original_orbit,final_orbit,planetradius,planetmu):
 	'''Returns DeltaV needed to perform desired Hohmann Transfer manuever'''
-	mu = Decimal(planets[planet]['mu'])
-	originalDistance = original_orbit + planets[planet]['radius']
-	finalDistance = final_orbit + planets[planet]['radius']
+	mu = Decimal(planetmu)
+	originalDistance = original_orbit + planetradius
+	finalDistance = final_orbit + planetradius
 	transfer_majoraxis = Decimal(originalDistance + finalDistance)/Decimal(2)
 	initialvelocity = orbital_velocity(mu,originalDistance)
 	finalvelocity = orbital_velocity(mu,finalDistance)
@@ -205,7 +207,7 @@ def hohmann_transfer(original_orbit,final_orbit,planet):
 #td
 def timeindarkness(planet,distance):
 	'''Determines how long, in minutes, a satellite will be in the shadow of its parent body'''
-	C=Decimal(planets[planet.capitalize()]['radius'])/Decimal(distance)
+	C=Decimal(planet)/Decimal(distance)
 	#Arc length, C in radians	-	http://www.mathopenref.com/arclength.html
 	length=Decimal(distance)*Decimal(C)*Decimal(2)
 	
@@ -238,60 +240,59 @@ def altitude_q():
 	altitude = float(raw_input(txt))*1000
 	return altitude
 	
-def orbiting_body():
-	txt = '\nWhat is the Orbiting Body?\n'+planets['Sun']['Moons']+'\n> '
-	planet = raw_input(txt)
-	return planet
+def orbiting_body(relation):
+	txt = '\nWhat body are you '+relation+'?\n'+planets['Sun']['Moons']+'\n> '
+	body = raw_input(txt)
+	planet = planets[body.capitalize()]
+	return body, planet
 
 def ic():
-	planet = orbiting_body()
-	mu = planets[planet.capitalize()]['mu']
+	body,planet = orbiting_body('orbiting')
+	mu = planet['mu']
 	altitude = altitude_q()
-	distance = planets[planet.capitalize()]['radius'] + altitude
+	distance = planet['radius'] + altitude
 	velocity = orbital_velocity(mu,distance)
 	txt ='How many degrees would you like to change your orbit by?\n> '
 	inclin_delta = raw_input(txt)
 	return inclination_change(velocity,inclin_delta)
 
 def ov():
-	planet = orbiting_body()
-	mu = planets[planet.capitalize()]['mu']
+	body,planet = orbiting_body('orbiting')
+	mu = planet['mu']
 	altitude = altitude_q()
-	distance = float(planets[planet.capitalize()]['radius'] + altitude)
+	distance = float(planet['radius'] + altitude)
 	velocity = orbital_velocity(mu,distance)
 	return velocity
 	
 def ev():
-	planet = orbiting_body()
-	ev = escape_velocity(planets[planet.capitalize()]['mu'],planets[planet.capitalize()]['radius'])
-	return planet,ev
+	body,planet = orbiting_body('orbiting')
+	ev = escape_velocity(planet['mu'],planet['radius'])
+	return body,ev
 	
 def pt():
-	txt = "\nWhat is the origin body? \n" +planets['Sun']['Moons']+'\n> '
-	planetA = str(raw_input(txt))
-	txt = "\nWhat is the target body? \n" +planets['Sun']['Moons']+'\n> '
-	planetB = str(raw_input(txt))
-	txt = "\nWhat is your orbit around %s, in Km:\n> " %(planetA.capitalize())
+	bodyA,planetA = orbiting_body('departing from')
+	bodyB,planetB = orbiting_body('arriving at')
+	txt = "\nWhat is your orbit around %s, in Km:\n> " %(bodyA.capitalize())
 	orbitA = float(raw_input(txt))*1000
-	txt = "\nWhat is your orbit around %s, in Km: \n> " %(planetB.capitalize())
+	txt = "\nWhat is your orbit around %s, in Km: \n> " %(bodyB.capitalize())
 	orbitB = float(raw_input(txt))*1000	
-	answer = planet_transfer(planetA.capitalize(),planetB.capitalize(),orbitA,orbitB)
+	answer = planet_transfer(bodyA.capitalize(),bodyB.capitalize(),orbitA,orbitB)
 	return answer
 	
 def ht():
-	planet = orbiting_body()
+	body,planet = orbiting_body('orbiting')
 	txt = "What is your current orbit, in Km?\n> "
 	original_orbit = float(raw_input(txt))*1000
 	txt = "What is your target orbit, in Km?\n> "
 	final_orbit = float(raw_input(txt))*1000
-	return hohmann_transfer(original_orbit,final_orbit,planet.capitalize())
+	return hohmann_transfer(original_orbit,final_orbit,planet['radius'],planet['mu'])
 	
 def td():
 	txt = '\nwhat is your expected orbit, in Km? \n> '
 	distance = int(raw_input(txt))*1000
 	txt = 'What is the parent body?\n'+str(planets.keys())+'\n> '
 	planet = raw_input(txt)
-	return float(timeindarkness(planet,distance))
+	return float(timeindarkness(planet['radius'],distance))
 
 def mt():
 	parent = orbiting_body()

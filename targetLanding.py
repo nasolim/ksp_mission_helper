@@ -1,4 +1,14 @@
+# Script Name: targetLanding.py
+# Author: Milo Sanu	
+# Created: 10/3/15
+# Last Modified:
+# Version: 1.0
+# Modifications:
+# Description: Script which provides the user with coordinates that are a predetermined 
+# distance from the original landing site. 
+
 from math import sin,cos,radians,pi,degrees
+from kerbalformulae import orbiting_body
 	
 def py_theorem(d,ang):
 	''' Given a displacement (d) - meters - and angle - degrees;
@@ -34,13 +44,11 @@ compass_dir = [
 'South',
 'South-East']
 
-
-
-#print new_position(10.18,-10.12,500,78.69,200000)
-position = [perimeter_landing(10.18,-10.12, 500, 200000)]
-
-for item in range(len(compass_dir)):
-	print compass_dir[item],'ward landing:\n','Lat: ',round(position[0][item][0],4),'Long: ',round(position[0][item][1],4)
-	
-
-
+def epicenter():
+	latitude = float(raw_input('What is your Latitude?\n>'))
+	longitude = float(raw_input('What is your Longitude?\n>'))
+	displacement = float(raw_input('How far from your current location would you like to be?\n>'))
+	body,celestial_radius = orbiting_body('parked on')
+	position = [perimeter_landing(latitude,longitude, displacement, celestial_radius['radius'])]
+	for item in range(len(compass_dir)):
+		print compass_dir[item],'landing:\n','Lat: ',round(position[0][item][0],4),'Long: ',round(position[0][item][1],4)
